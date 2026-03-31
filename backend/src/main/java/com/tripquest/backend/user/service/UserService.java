@@ -2,6 +2,8 @@ package com.tripquest.backend.user.service;
 
 import com.tripquest.backend.auth.entity.User;
 import com.tripquest.backend.auth.repository.UserRepository;
+import com.tripquest.backend.user.dto.BucketlistRequest;
+import com.tripquest.backend.user.dto.BucketlistResponse;
 import com.tripquest.backend.user.dto.UpdateProfileRequest;
 import com.tripquest.backend.user.dto.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,11 +46,57 @@ public class UserService {
             user.getVisitedCountries().add(countryCode);
             user.setTravelScore(user.getTravelScore() + 10);
             user.setLevel(user.getVisitedCountries().size() / 5 + 1);
-            userRepository.save(user);
         }
+
+        user.getBucketlistCountries().remove(countryCode);
+        userRepository.save(user);
 
         badgeService.checkAndAwardBadges(userId);
         return toResponse(user);
+    }
+
+    @Transactional
+    public BucketlistResponse addToBucketlist(Long userId, BucketlistRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        String countryCode = request.getCountryCode();
+
+        if (user.getVisitedCountries().contains(countryCode)) {
+            throw new RuntimeException("Country already visited: " + countryCode);
+        }
+        if (user.getBucketlistCountries().contains(countryCode)) {
+            throw new RuntimeException("Country already in bucketlist: " + countryCode);
+        }
+
+        user.getBucketlistCountries().add(countryCode);
+        userRepository.save(user);
+
+        return toBucketlistResponse(user);
+    }
+
+    @Transactional
+    public BucketlistResponse removeFromBucketlist(Long userId, String countryCode) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        user.getBucketlistCountries().remove(countryCode);
+        userRepository.save(user);
+
+        return toBucketlistResponse(user);
+    }
+
+    public BucketlistResponse getBucketlist(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+        return toBucketlistResponse(user);
+    }
+
+    private BucketlistResponse toBucketlistResponse(User user) {
+        return BucketlistResponse.builder()
+                .countryCodes(user.getBucketlistCountries())
+                .totalCount(user.getBucketlistCountries().size())
+                .build();
     }
 
     private UserProfileResponse toResponse(User user) {

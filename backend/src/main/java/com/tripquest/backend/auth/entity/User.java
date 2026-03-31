@@ -65,6 +65,12 @@ public class User implements UserDetails {
     @Builder.Default
     private List<String> visitedCountries = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "user_bucketlist", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "country_code")
+    @Builder.Default
+    private List<String> bucketlistCountries = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
