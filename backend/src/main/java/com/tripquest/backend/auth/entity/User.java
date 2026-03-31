@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,6 +39,43 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @Column
+    private String bio;
+
+    @Column
+    private String avatarUrl;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer travelScore = 0;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Integer level = 1;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @ElementCollection
+    @CollectionTable(name = "user_visited_countries", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "country_code")
+    @Builder.Default
+    private List<String> visitedCountries = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -48,5 +87,10 @@ public class User implements UserDetails {
         return email;
     }
 
-    // TODO: Add createdAt, updatedAt, profilePicture, trips relationship
+    // Retourne le nom d'affichage (Lombok ne génère pas getUsername() car surchargé)
+    public String getDisplayUsername() {
+        return username;
+    }
+
+    // TODO: Add trips relationship
 }
