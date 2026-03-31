@@ -23,5 +23,6 @@ public class PostResponse {
     private String imageUrl;
     private Integer rating;
     private LocalDateTime createdAt;
-    private Integer likesCount;
+    private Long likesCount;
+    private boolean likedByCurrentUser;
 }

@@ -36,6 +36,6 @@ public class FeedService {
 
         return postRepository
                 .findByAuthorIdInOrderByCreatedAtDesc(authorIds, PageRequest.of(page, size))
-                .map(postService::toResponse);
+                .map(post -> postService.toResponse(post, null));
     }
 }

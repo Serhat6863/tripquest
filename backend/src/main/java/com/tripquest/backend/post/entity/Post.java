@@ -43,10 +43,6 @@ public class Post {
     @Column(nullable = false)
     private Integer rating;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer likesCount = 0;
-
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
