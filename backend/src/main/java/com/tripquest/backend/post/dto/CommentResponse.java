@@ -7,26 +7,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostResponse {
+public class CommentResponse {
 
     private Long id;
     private FriendResponse author;
-    private String countryCode;
-    private String countryName;
-    private String title;
     private String content;
-    private String imageUrl;
-    private Integer rating;
     private LocalDateTime createdAt;
-    private Long likesCount;
-    private boolean likedByCurrentUser;
-    private Long commentsCount;
-    // Null in list views, populated only in single post detail
-    private List<CommentResponse> comments;
+    private LocalDateTime updatedAt;
 }

@@ -7,6 +7,7 @@ import com.tripquest.backend.post.dto.CreatePostRequest;
 import com.tripquest.backend.post.dto.PostResponse;
 import com.tripquest.backend.post.entity.Post;
 import com.tripquest.backend.post.entity.PostLike;
+import com.tripquest.backend.post.repository.CommentRepository;
 import com.tripquest.backend.post.repository.PostLikeRepository;
 import com.tripquest.backend.post.repository.PostRepository;
 import com.tripquest.backend.user.service.UserService;
@@ -22,6 +23,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final UserService userService;
 
@@ -85,6 +87,38 @@ public class PostService {
         return toResponse(post, currentUserId);
     }
 
+    public PostResponse getPostById(Long postId, Long currentUserId) {
+        Post post = findPostOrThrow(postId);
+        boolean liked = currentUserId != null
+                && postLikeRepository.existsByUserIdAndPostId(currentUserId, post.getId());
+
+        return PostResponse.builder()
+                .id(post.getId())
+                .author(toFriendResponse(post.getAuthor()))
+                .countryCode(post.getCountryCode())
+                .countryName(post.getCountryName())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .imageUrl(post.getImageUrl())
+                .rating(post.getRating())
+                .createdAt(post.getCreatedAt())
+                .likesCount(postLikeRepository.countByPostId(post.getId()))
+                .likedByCurrentUser(liked)
+                .commentsCount(commentRepository.countByPostId(post.getId()))
+                .comments(
+                        commentRepository.findByPostIdOrderByCreatedAtAsc(post.getId()).stream()
+                                .map(c -> com.tripquest.backend.post.dto.CommentResponse.builder()
+                                        .id(c.getId())
+                                        .author(toFriendResponse(c.getAuthor()))
+                                        .content(c.getContent())
+                                        .createdAt(c.getCreatedAt())
+                                        .updatedAt(c.getUpdatedAt())
+                                        .build())
+                                .toList()
+                )
+                .build();
+    }
+
     private Post findPostOrThrow(Long postId) {
         return postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found: " + postId));
@@ -106,6 +140,8 @@ public class PostService {
                 .createdAt(post.getCreatedAt())
                 .likesCount(postLikeRepository.countByPostId(post.getId()))
                 .likedByCurrentUser(liked)
+                .commentsCount(commentRepository.countByPostId(post.getId()))
+                .comments(null)
                 .build();
     }
 
