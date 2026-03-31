@@ -5,6 +5,7 @@ import com.tripquest.backend.auth.repository.UserRepository;
 import com.tripquest.backend.user.dto.UpdateProfileRequest;
 import com.tripquest.backend.user.dto.UserProfileResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    @Lazy
+    private final BadgeService badgeService;
 
     public UserProfileResponse getUserById(Long id) {
         User user = userRepository.findById(id)
@@ -41,9 +44,11 @@ public class UserService {
             user.getVisitedCountries().add(countryCode);
             user.setTravelScore(user.getTravelScore() + 10);
             user.setLevel(user.getVisitedCountries().size() / 5 + 1);
+            userRepository.save(user);
         }
 
-        return toResponse(userRepository.save(user));
+        badgeService.checkAndAwardBadges(userId);
+        return toResponse(user);
     }
 
     private UserProfileResponse toResponse(User user) {
@@ -59,5 +64,5 @@ public class UserService {
                 .build();
     }
 
-    // TODO: Add getUserRanking, searchUsers, getUserBadges methods
+    // TODO: Add getUserRanking, searchUsers methods
 }

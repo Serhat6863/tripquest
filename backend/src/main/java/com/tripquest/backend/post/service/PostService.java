@@ -10,6 +10,7 @@ import com.tripquest.backend.post.entity.PostLike;
 import com.tripquest.backend.post.repository.CommentRepository;
 import com.tripquest.backend.post.repository.PostLikeRepository;
 import com.tripquest.backend.post.repository.PostRepository;
+import com.tripquest.backend.user.service.BadgeService;
 import com.tripquest.backend.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final BadgeService badgeService;
 
     @Transactional
     public PostResponse createPost(Long authorId, CreatePostRequest request) {
@@ -44,6 +46,7 @@ public class PostService {
 
         Post saved = postRepository.save(post);
         userService.addVisitedCountry(authorId, request.getCountryCode());
+        badgeService.checkAndAwardBadges(authorId);
 
         return toResponse(saved, null);
     }

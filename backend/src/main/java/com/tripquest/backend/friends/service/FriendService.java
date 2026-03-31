@@ -7,6 +7,7 @@ import com.tripquest.backend.friends.dto.FriendshipResponse;
 import com.tripquest.backend.friends.entity.Friendship;
 import com.tripquest.backend.friends.entity.FriendshipStatus;
 import com.tripquest.backend.friends.repository.FriendshipRepository;
+import com.tripquest.backend.user.service.BadgeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class FriendService {
 
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final BadgeService badgeService;
 
     @Transactional
     public FriendshipResponse sendRequest(Long senderId, Long receiverId) {
@@ -56,7 +58,12 @@ public class FriendService {
         }
 
         friendship.setStatus(FriendshipStatus.ACCEPTED);
-        return toFriendshipResponse(friendshipRepository.save(friendship));
+        FriendshipResponse response = toFriendshipResponse(friendshipRepository.save(friendship));
+
+        badgeService.checkAndAwardBadges(friendship.getSender().getId());
+        badgeService.checkAndAwardBadges(friendship.getReceiver().getId());
+
+        return response;
     }
 
     @Transactional

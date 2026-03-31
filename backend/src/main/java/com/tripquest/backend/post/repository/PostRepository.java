@@ -16,4 +16,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByCountryCodeOrderByCreatedAtDesc(String countryCode);
 
     Page<Post> findByAuthorIdInOrderByCreatedAtDesc(List<Long> authorIds, Pageable pageable);
+
+    long countByAuthorId(Long authorId);
 }
