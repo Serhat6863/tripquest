@@ -78,7 +78,7 @@ public class PostService {
                 .orElseThrow(() -> new RuntimeException("Post not found: " + postId));
     }
 
-    private PostResponse toResponse(Post post) {
+    public PostResponse toResponse(Post post) {
         return PostResponse.builder()
                 .id(post.getId())
                 .author(toFriendResponse(post.getAuthor()))

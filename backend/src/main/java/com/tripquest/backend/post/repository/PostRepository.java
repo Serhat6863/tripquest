@@ -1,6 +1,7 @@
 package com.tripquest.backend.post.repository;
 
 import com.tripquest.backend.post.entity.Post;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,5 +15,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByCountryCodeOrderByCreatedAtDesc(String countryCode);
 
-    List<Post> findByAuthorIdInOrderByCreatedAtDesc(List<Long> authorIds, Pageable pageable);
+    Page<Post> findByAuthorIdInOrderByCreatedAtDesc(List<Long> authorIds, Pageable pageable);
 }
