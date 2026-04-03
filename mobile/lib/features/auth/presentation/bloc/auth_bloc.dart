@@ -48,7 +48,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     switch (result) {
       case ApiSuccess():
-        emit(const AuthAuthenticated());
+        emit(const AuthRegistered());
       case ApiError(:final message):
         emit(AuthError(message));
     }

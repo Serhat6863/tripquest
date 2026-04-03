@@ -19,6 +19,10 @@ final class AuthAuthenticated extends AuthState {
   const AuthAuthenticated();
 }
 
+final class AuthRegistered extends AuthState {
+  const AuthRegistered();
+}
+
 final class AuthUnauthenticated extends AuthState {
   const AuthUnauthenticated();
 }

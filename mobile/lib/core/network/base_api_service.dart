@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'api_response.dart';
 
@@ -20,12 +21,25 @@ abstract class BaseApiService {
       );
       return ApiSuccess<T>(fromJson!(response.data));
     } on DioException catch (e) {
-      final statusCode = e.response?.statusCode;
-      return switch (statusCode) {
-        401 => ApiError<T>('Unauthorized', 401),
-        404 => ApiError<T>('Not found', 404),
-        500 => ApiError<T>('Server error', 500),
-        _ => ApiError<T>(e.message ?? 'Network error', statusCode),
+      if (e.error is SocketException) {
+        return ApiError<T>('No internet connection', null);
+      }
+      return switch (e.type) {
+        DioExceptionType.connectionTimeout =>
+          ApiError<T>('Connection timeout, try again', null),
+        DioExceptionType.receiveTimeout =>
+          ApiError<T>('Server is slow, try again', null),
+        DioExceptionType.connectionError =>
+          ApiError<T>('Cannot reach server', null),
+        _ => switch (e.response?.statusCode) {
+            400 => ApiError<T>('Invalid credentials', 400),
+            401 => ApiError<T>('Wrong email or password', 401),
+            404 => ApiError<T>('Not found', 404),
+            409 => ApiError<T>('Email already exists', 409),
+            500 => ApiError<T>('Server error, try again later', 500),
+            _ => ApiError<T>(
+                e.message ?? 'Network error', e.response?.statusCode),
+          },
       };
     } catch (_) {
       return ApiError<T>('Unexpected error', null);
